@@ -9,13 +9,18 @@ import loggerMiddleware from './validations/middleware/loggerMiddleware.js';
 const app = express();
 const port = configuration.PORT;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: `${configuration.FRONTEND_URL}`,
+    methods: ['POST', 'GET'],
+  })
+);
+
 app.use(express.json());
 app.use(loggerMiddleware);
 
 app.use('/upload', uploadRoutes);
 
-// eslint-disable-next-line no-unused-vars
 app.use(errorHandler);
 
 app.listen(port, () => {
