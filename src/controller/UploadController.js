@@ -1,8 +1,9 @@
-import axios from 'axios';
-import FormData from 'form-data';
-
-import configuration from '../config/config.js';
+import tgObj from '../utils/tgObject.js';
 import getUrl from '../utils/getFilePath.js';
+import fileUpload from '../models/fileModel.js';
+import generateCode from '../utils/genCode.js';
+import genQR from '../utils/genQrCode.js';
+import uniqueCode from '../models/codeModel.js';
 
 export default class UploadController {
   fileImport = async (req, res, next) => {
@@ -24,32 +25,40 @@ export default class UploadController {
       }
 
       // operations section
+      const uniCode = await generateCode();
+
+      const data = `${req.protocol}://${req.get('host')}/download/${uniCode}`;
+      const qrPath = await genQR(data, uniCode);
 
       for (let i = 0; i < files.length; i++) {
-        // upload file in telegram server
-        const tgForm = new FormData();
-
-        tgForm.append('chat_id', configuration.CHAT_ID);
-        tgForm.append('document', files[i].buffer, {
+        const tgForm = tgObj(files[i].buffer, {
           filename: files[i].originalname,
           contentType: files[i].mimetype,
         });
 
-        const sendResponse = await axios.post(
-          `https://api.telegram.org/bot${configuration.BOT_TOKEN}/sendDocument`,
-          tgForm,
-          { headers: tgForm.getHeaders() }
-        );
+        const fileUrl = await getUrl(tgForm);
 
-        const fileId = sendResponse.data.result.document.file_id;
-        const fileUrl = await getUrl(fileId);
+        const fileData = {
+          fileName: files[i].originalname,
+          fileSize: files[i].size,
+          fileUrl,
+          uniqueCode: uniCode,
+          qrPath,
+        };
 
-        console.log(fileUrl);
+        const newFile = new fileUpload(fileData);
+
+        await newFile.save();
       }
+
+      const fileIds = await fileUpload.find({ uniqueCode: uniCode });
+      const newCode = new uniqueCode({ code: uniCode, fileIds, qrPath });
+      const fileSession = await newCode.save();
 
       res.status(200).json({
         success: true,
         message: 'All files recived',
+        session: fileSession,
       });
     } catch (err) {
       next(err);
