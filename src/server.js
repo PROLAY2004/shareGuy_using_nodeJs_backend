@@ -3,8 +3,9 @@ import cors from 'cors';
 
 import configuration from './config/config.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import downloadRoutes from './routes/downloadRoutes.js';
 import errorHandler from './error/errorHandler.js';
-import loggerMiddleware from './validations/middleware/loggerMiddleware.js';
+import loggerMiddleware from './middleware/loggerMiddleware.js';
 import connectDB from './config/dbConfig.js';
 
 connectDB();
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 app.use('/upload', uploadRoutes);
+app.use('/download', downloadRoutes);
 
 app.use(errorHandler);
 
