@@ -2,14 +2,13 @@ import axios from 'axios';
 import FormData from 'form-data';
 
 import configuration from '../config/config.js';
+import getUrl from '../utils/getFilePath.js';
 
 export default class UploadController {
   fileImport = async (req, res, next) => {
     try {
       const files = req.files;
 
-      console.log(files);
-      
       // check is there any file or not
       if (files.length == 0) {
         res.status(404);
@@ -25,9 +24,9 @@ export default class UploadController {
       }
 
       // operations section
+
       for (let i = 0; i < files.length; i++) {
         // upload file in telegram server
-
         const tgForm = new FormData();
 
         tgForm.append('chat_id', configuration.CHAT_ID);
@@ -42,16 +41,8 @@ export default class UploadController {
           { headers: tgForm.getHeaders() }
         );
 
-        // get file path from server
-        
         const fileId = sendResponse.data.result.document.file_id;
-        const getFileResp = await axios.get(
-          `https://api.telegram.org/bot${configuration.BOT_TOKEN}/getFile`,
-          { params: { file_id: fileId } }
-        );
-
-        const filePath = getFileResp.data.result.file_path;
-        const fileUrl = `https://api.telegram.org/file/bot${configuration.BOT_TOKEN}/${filePath}`;
+        const fileUrl = await getUrl(fileId);
 
         console.log(fileUrl);
       }
