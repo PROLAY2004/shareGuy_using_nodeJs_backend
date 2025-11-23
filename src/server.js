@@ -5,7 +5,9 @@ import configuration from './config/config.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import errorHandler from './error/errorHandler.js';
 import loggerMiddleware from './validations/middleware/loggerMiddleware.js';
+import connectDB from './config/dbConfig.js';
 
+connectDB();
 const app = express();
 const port = configuration.PORT;
 
