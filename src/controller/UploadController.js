@@ -41,6 +41,7 @@ export default class UploadController {
         const fileData = {
           fileName: files[i].originalname,
           fileSize: files[i].size,
+          contentType: files[i].mimetype,
           fileUrl,
           uniqueCode: uniCode,
           qrPath,
@@ -51,13 +52,19 @@ export default class UploadController {
         await newFile.save();
       }
 
-      const fileIds = await fileUpload.find({ uniqueCode: uniCode });
+      const fileData = await fileUpload.find({ uniqueCode: uniCode });
+      const fileIds = [];
+
+      for (let i = 0; i < fileData.length; i++) {
+        fileIds.push(fileData[i]._id);
+      }
+
       const newCode = new uniqueCode({ code: uniCode, fileIds, qrPath });
       const fileSession = await newCode.save();
 
       res.status(200).json({
         success: true,
-        message: 'All files recived',
+        message: 'All files Uploaded',
         session: fileSession,
       });
     } catch (err) {

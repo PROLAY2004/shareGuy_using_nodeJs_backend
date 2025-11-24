@@ -14,6 +14,10 @@ const fileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    contentType: {
+      type: String,
+      required: true,
+    },
     uniqueCode: {
       type: String,
       required: true,
