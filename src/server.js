@@ -20,7 +20,7 @@ app.use(
 );
 
 app.use(express.json());
-app.use(loggerMiddleware);
+// app.use(loggerMiddleware);
 
 app.use('/upload', uploadRoutes);
 app.use('/download', downloadRoutes);

@@ -75,13 +75,6 @@ export default class UploadController {
   endTransfer = async (req, res, next) => {
     try {
       const code = req.params.id;
-
-      if (!code) {
-        res.status(401);
-
-        throw new Error('No code Provided');
-      }
-
       const fileData = await uniqueCode.findOne({ code });
 
       if (!fileData) {
