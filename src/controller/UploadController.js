@@ -76,7 +76,11 @@ export default class UploadController {
     try {
       const code = req.params.id;
 
-      console.log(code);
+      if (!code) {
+        res.status(401);
+
+        throw new Error('No code Provided');
+      }
 
       const fileData = await uniqueCode.findOne({ code });
 

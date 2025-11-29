@@ -8,6 +8,13 @@ export default class DownloadController {
   fileExport = async (req, res, next) => {
     try {
       const code = req.params.code;
+
+      if(!code){
+        res.status(401)
+
+        throw new ErrorEvent('Code is required')
+      }
+      
       const fileData = await uniqueCode.findOne({ code });
 
       if (!fileData) {
