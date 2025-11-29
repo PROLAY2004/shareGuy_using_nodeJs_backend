@@ -1,5 +1,5 @@
 import axios from 'axios';
-import path from 'path';
+import archiver from 'archiver';
 
 import uniqueCode from '../models/codeModel.js';
 import fileUpload from '../models/fileModel.js';
@@ -22,9 +22,7 @@ export default class DownloadController {
         const file = await fileUpload.findById(fileIds[0]);
         const fileUrl = file.fileUrl;
 
-        const response = await axios.get(fileUrl, {
-          responseType: 'stream',
-        });
+        const response = await axios.get(fileUrl, { responseType: 'stream' });
 
         res.setHeader(
           'Content-Disposition',
@@ -32,12 +30,28 @@ export default class DownloadController {
         );
         res.setHeader('Content-Type', response.headers['content-type']);
 
-        // stream to user
         response.data.pipe(res);
       } else {
-        console.log('More than 1 file');
-      }
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${code}.zip"`
+        );
+        res.setHeader('Content-Type', 'application/zip');
 
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        archive.pipe(res);
+
+        for (let id of fileIds) {
+          const file = await fileUpload.findById(id);
+          const fileUrl = file.fileUrl;
+
+          const response = await axios.get(fileUrl, { responseType: 'stream' });
+
+          archive.append(response.data, { name: file.fileName });
+        }
+
+        archive.finalize();
+      }
     } catch (err) {
       next(err);
     }
