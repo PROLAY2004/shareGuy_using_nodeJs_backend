@@ -74,7 +74,35 @@ export default class UploadController {
 
   endTransfer = async (req, res, next) => {
     try {
-      const code = req.params._id;
+      const code = req.params.id;
+
+      console.log(code);
+
+      const fileData = await uniqueCode.findOne({ code });
+
+      if (!fileData) {
+        res.status(401);
+
+        throw new Error('Invalid Code');
+      } else if (!fileData.isActive) {
+        res.status(400);
+
+        throw new Error('The transfer has already ended.');
+      }
+
+      const endFileSession = await uniqueCode.findOneAndUpdate(
+        { code },
+        {
+          isActive: false,
+        }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Transfer Ended',
+        session: endFileSession,
+      });
+
     } catch (err) {
       next(err);
     }

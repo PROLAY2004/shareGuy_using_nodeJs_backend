@@ -11,6 +11,6 @@ const router = express.Router();
 const upload = new UploadController();
 
 router.post('/', files.array('selectFiles[]'), upload.fileImport);
-router.post('/End/:id', upload.endTransfer);
+router.post('/end/:id', upload.endTransfer);
 
 export default router;
