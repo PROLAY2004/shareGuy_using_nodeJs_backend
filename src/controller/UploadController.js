@@ -71,4 +71,12 @@ export default class UploadController {
       next(err);
     }
   };
+
+  endTransfer = async (req, res, next) => {
+    try {
+      const code = req.params._id;
+    } catch (err) {
+      next(err);
+    }
+  };
 }

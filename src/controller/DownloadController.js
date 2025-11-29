@@ -15,6 +15,11 @@ export default class DownloadController {
 
         throw new Error('Invalid Code');
       }
+      else if(!fileData.isActive){
+        res.status(401)
+
+        throw new Error('Transfer session has ended.');
+      }
 
       const fileIds = fileData.fileIds;
 
