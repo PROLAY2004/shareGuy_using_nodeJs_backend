@@ -1,0 +1,22 @@
+import { fileMailerSchema } from '../schema/EmailFileSchema.js';
+import { ValidationError } from 'yup';
+
+export default class EmailFileValidation {
+  fileMailerRequest = async (req, res, next) => {
+    try {
+      await fileMailerSchema.validate(req.body, {
+        abortEarly: false, // return all validation errors
+        stripUnknown: true, // remove unexpected fields
+      });
+
+      next();
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        res.status(400);
+        next(new Error(err.errors.join(', ')));
+      }
+
+      next(err);
+    }
+  };
+}

@@ -1,8 +1,11 @@
 import axios from 'axios';
 import archiver from 'archiver';
 
+import SendEmailService from '../services/SendEmailService.js';
 import uniqueCode from '../models/codeModel.js';
 import fileUpload from '../models/fileModel.js';
+
+const emailService = new SendEmailService();
 
 export default class DownloadController {
   fileExport = async (req, res, next) => {
@@ -14,11 +17,10 @@ export default class DownloadController {
         res.status(401);
 
         throw new Error('Invalid Code Entered');
-      }
-      else if(!fileData.isActive){
-        res.status(401)
+      } else if (!fileData.isActive) {
+        res.status(401);
 
-        throw new Error('Code Expired : Session Ended.');
+        throw new Error('The code has expired.');
       }
 
       const fileIds = fileData.fileIds;
@@ -57,6 +59,35 @@ export default class DownloadController {
 
         archive.finalize();
       }
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  emailFile = async (req, res, next) => {
+    try {
+      const email = req.body.email;
+      const code = req.body.code;
+
+      const fileData = await uniqueCode.findOne({ code });
+
+      if (!fileData) {
+        res.status(401);
+
+        throw new Error('Invalid Code Entered');
+      } else if (!fileData.isActive) {
+        res.status(401);
+
+        throw new Error('The code has expired.');
+      }
+
+      console.log(fileData);
+      
+
+      res.status(200).json({
+        success: true,
+        message: 'File sent to email.',
+      });
     } catch (err) {
       next(err);
     }
