@@ -5,7 +5,7 @@ import configuration from './config/config.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import downloadRoutes from './routes/downloadRoutes.js';
 import errorHandler from './error/errorHandler.js';
-import loggerMiddleware from './middleware/loggerMiddleware.js';
+import loggerMiddleware from './validations/middleware/loggerMiddleware.js';
 import connectDB from './config/dbConfig.js';
 
 connectDB();
