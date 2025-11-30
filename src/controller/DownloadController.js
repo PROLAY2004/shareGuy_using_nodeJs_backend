@@ -3,6 +3,7 @@ import archiver from 'archiver';
 
 import SendEmailService from '../services/SendEmailService.js';
 import fileUpload from '../models/fileModel.js';
+import isValidEmail from '../utils/checkValidEmail.js';
 
 const emailService = new SendEmailService();
 
@@ -53,6 +54,13 @@ export default class DownloadController {
   emailFile = async (req, res, next) => {
     try {
       const email = req.body.email;
+
+      if(!isValidEmail(email)){
+        res.status(401)
+
+        throw new Error('Please Enter a Valid Email');
+      }
+      
       const fileIds = req.fileIds;
       const files = await fileUpload.find({ _id: { $in: fileIds } });
 
@@ -61,12 +69,15 @@ export default class DownloadController {
         fileUrl: file.fileUrl, // your URL (Telegram / storage / etc.)
       }));
 
-      const emailResponse = await emailService.fileMailer(email, formattedFiles);    
+      const emailResponse = await emailService.fileMailer(
+        email,
+        formattedFiles
+      );
 
       res.status(200).json({
         success: true,
         message: 'File sent to email.',
-        emailResponse
+        emailResponse,
       });
     } catch (err) {
       next(err);
