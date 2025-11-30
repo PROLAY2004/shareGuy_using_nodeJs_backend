@@ -5,8 +5,6 @@ export default class SendEmailService {
   // Common mail sender
   mailSender = async (email, title, body, attachments = []) => {
     try {
-      console.log('sending email...');
-
       const transporter = nodemailer.createTransport({
         service: configuration.MAIL_SERVICE,
         auth: {
@@ -29,38 +27,34 @@ export default class SendEmailService {
     }
   };
 
-  // File mailer – send file as attachment + simple template
-  fileMailer = async (email, fileUrl, fileName, next) => {
-    try {
-      const body = `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Your file from ShareGuy</h2>
-          <p>Hi,</p>
-          <p>The file you requested has been attached to this email.</p>
-          <p>If the attachment is not visible, you can also download it using this link:</p>
-          <p><a href="${fileUrl}" target="_blank">${fileUrl}</a></p>
-          <br/>
-          <p>Regards,<br/>ShareGuy Team</p>
-        </div>
-      `;
+  fileMailer = async (email, files) => {
+    // files = [{ fileName, fileUrl }, ...]
+    const attachments = files.map((file) => ({
+      filename: file.fileName,
+      path: file.fileUrl,
+    }));
 
-      const attachments = [
-        {
-          filename: fileName, // e.g. "document.pdf"
-          path: fileUrl, // can be local path or https URL
-        },
-      ];
+    const fileListHtml = files.map((f) => `<li>${f.fileName}</li>`).join('');
 
-      const mailResponse = await this.mailSender(
-        email,
-        'Your File from ShareGuy',
-        body,
-        attachments
-      );
+    const body = `
+      <div style="font-family: Arial, sans-serif;">
+        <h2>Your file${files.length > 1 ? 's' : ''} from ShareGuy</h2>
+        <p>Hi,</p>
+        <p>The following file${files.length > 1 ? 's have' : ' has'} been attached to this email:</p>
+        <ul>
+          ${fileListHtml}
+        </ul>
+        <p>If the attachments are not visible, please try opening this email in a different mail app.</p>
+        <br/>
+        <p>Regards,<br/>ShareGuy Team</p>
+      </div>
+    `;
 
-      console.log('File Email sent successfully: ', mailResponse);
-    } catch (error) {
-      next(error);
-    }
+    return this.mailSender(
+      email,
+      'Your file(s) from ShareGuy',
+      body,
+      attachments
+    );
   };
 }

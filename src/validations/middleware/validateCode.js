@@ -17,7 +17,7 @@ const validateCode = async (req, res, next) => {
       throw new Error('The code has expired.');
     }
 
-    req.fileData = fileData;
+    req.fileIds = fileData.fileIds;
     next();
   } catch (error) {
     next(error);

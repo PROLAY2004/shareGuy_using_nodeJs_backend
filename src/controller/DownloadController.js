@@ -2,7 +2,6 @@ import axios from 'axios';
 import archiver from 'archiver';
 
 import SendEmailService from '../services/SendEmailService.js';
-import uniqueCode from '../models/codeModel.js';
 import fileUpload from '../models/fileModel.js';
 
 const emailService = new SendEmailService();
@@ -10,8 +9,7 @@ const emailService = new SendEmailService();
 export default class DownloadController {
   fileExport = async (req, res, next) => {
     try {
-      const fileData = req.fileData;
-      const fileIds = fileData.fileIds;
+      const fileIds = req.fileIds;
 
       if (fileIds.length === 1) {
         const file = await fileUpload.findById(fileIds[0]);
@@ -55,13 +53,20 @@ export default class DownloadController {
   emailFile = async (req, res, next) => {
     try {
       const email = req.body.email;
-      const fileData = req.fileData;
+      const fileIds = req.fileIds;
+      const files = await fileUpload.find({ _id: { $in: fileIds } });
 
-      console.log(fileData);
+      const formattedFiles = files.map((file) => ({
+        fileName: file.fileName,
+        fileUrl: file.fileUrl, // your URL (Telegram / storage / etc.)
+      }));
+
+      const emailResponse = await emailService.fileMailer(email, formattedFiles);    
 
       res.status(200).json({
         success: true,
         message: 'File sent to email.',
+        emailResponse
       });
     } catch (err) {
       next(err);
