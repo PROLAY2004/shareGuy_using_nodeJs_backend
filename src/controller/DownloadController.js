@@ -26,9 +26,10 @@ export default class DownloadController {
 
         response.data.pipe(res);
       } else {
+        const customFileName = req.code + ".zip"
         res.setHeader(
           'Content-Disposition',
-          `attachment; filename="${code}.zip"`
+          `attachment; filename=${customFileName}`
         );
         res.setHeader('Content-Type', 'application/zip');
 

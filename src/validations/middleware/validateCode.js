@@ -18,6 +18,8 @@ const validateCode = async (req, res, next) => {
     }
 
     req.fileIds = fileData.fileIds;
+    req.code = code;
+    
     next();
   } catch (error) {
     next(error);
