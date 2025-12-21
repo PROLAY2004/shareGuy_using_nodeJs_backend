@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "ShareGuy Backend Server",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "type": "module",
     "dev": "nodemon --inspect src/server.js",
     "format": "npx prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
