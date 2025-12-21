@@ -24,6 +24,10 @@ app.use(cors(configuration.CORS));
 app.use(express.json());
 app.use(loggerMiddleware);
 
+app.get('/', (req, res) => {
+  res.send('Server Running Successfully');
+});
+
 app.use('/upload', uploadRoutes);
 app.use('/download', downloadRoutes);
 
