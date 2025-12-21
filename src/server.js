@@ -1,45 +1,36 @@
 import express from 'express';
 import cors from 'cors';
-import { WebSocketServer } from 'ws';
+import { Server } from 'socket.io';
 
-import initWebsocketServer from './ws.js';
+import { createServer } from 'http';
 import configuration from './config/config.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import downloadRoutes from './routes/downloadRoutes.js';
-import socketRoutes from './routes/socketRoutes.js';
 import errorHandler from './error/errorHandler.js';
 import loggerMiddleware from './validations/middleware/loggerMiddleware.js';
 import connectDB from './config/dbConfig.js';
+import initSocket from './webSocket/ws.js';
 
-connectDB();
+await connectDB();
+
 const app = express();
-const port = configuration.PORT;
-const wss = new WebSocketServer({ noServer: true });
+const server = createServer(app);
+export const io = new Server(server, {
+  cors: configuration.CORS,
+});
 
-app.use(
-  cors({
-    origin: `${configuration.FRONTEND_URL}`,
-    methods: ['POST', 'GET'],
-  })
-);
+app.use(cors(configuration.CORS));
 
 app.use(express.json());
 app.use(loggerMiddleware);
 
 app.use('/upload', uploadRoutes);
 app.use('/download', downloadRoutes);
-app.use('/connect', socketRoutes);
 
 app.use(errorHandler);
 
-initWebsocketServer();
+initSocket();
 
-const server = app.listen(port, () => {
-  console.log(`ShareGuy listening on port ${port}`);
-});
-
-server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
+server.listen(configuration.PORT, () => {
+  console.log(`ShareGuy listening on port ${configuration.PORT}`);
 });
