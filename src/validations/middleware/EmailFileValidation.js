@@ -1,4 +1,4 @@
-import { fileMailerSchema } from '../schema/EmailFileSchema.js';
+import { fileMailerSchema } from '../schema/emailFileSchema.js';
 import { ValidationError } from 'yup';
 
 export default class EmailFileValidation {
