@@ -1,6 +1,6 @@
 import express from 'express';
 
-import DownloadController from '../controller/downloadController.js';
+import DownloadController from '../controller/DownloadController.js';
 import EmailFileValidation from '../validations/middleware/EmailFileValidation.js';
 import validateCode from '../validations/middleware/validateCode.js';
 
