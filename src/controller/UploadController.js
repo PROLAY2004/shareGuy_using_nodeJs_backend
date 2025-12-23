@@ -1,8 +1,5 @@
-import tgObj from '../utils/tgObject.js';
-import getUrl from '../utils/getFilePath.js';
 import fileUpload from '../models/fileModel.js';
 import generateCode from '../utils/genCode.js';
-import genQR from '../utils/genQrCode.js';
 import uniqueCode from '../models/codeModel.js';
 
 export default class UploadController {
@@ -27,9 +24,6 @@ export default class UploadController {
       // operations section
       const uniCode = await generateCode();
 
-      const data = `${req.protocol}://${req.get('host')}/download/${uniCode}`;
-      const qrPath = await genQR(data, uniCode);
-
       for (const file of files) {
         const fileData = {
           fileName: file.originalname,
@@ -37,7 +31,6 @@ export default class UploadController {
           contentType: file.mimetype,
           fileUrl: file.path,
           uniqueCode: uniCode,
-          qrPath,
         };
 
         await new fileUpload(fileData).save();
@@ -50,7 +43,7 @@ export default class UploadController {
         fileIds.push(fileData[i]._id);
       }
 
-      const newCode = new uniqueCode({ code: uniCode, fileIds, qrPath });
+      const newCode = new uniqueCode({ code: uniCode, fileIds });
       const fileSession = await newCode.save();
 
       res.status(200).json({
