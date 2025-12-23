@@ -11,10 +11,6 @@ const codeSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
-    qrPath: {
-      type: String,
-      required: true,
-    },
     isActive: {
       type: Boolean,
       required: true,
