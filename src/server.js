@@ -22,7 +22,7 @@ export const io = new Server(server, {
 app.use(cors(configuration.CORS));
 
 app.use(express.json());
-app.use(loggerMiddleware);
+// app.use(loggerMiddleware);
 
 app.get('/', (req, res) => {
   res.send('Server Running Successfully');

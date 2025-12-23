@@ -7,6 +7,8 @@ export default class UploadController {
     try {
       const files = req.files;
 
+      console.log(files);
+
       // check is there any file or not
       if (files.length == 0) {
         res.status(404);
@@ -24,18 +26,21 @@ export default class UploadController {
       // operations section
       const uniCode = await generateCode();
 
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
         const fileData = {
-          fileName: file.originalname,
-          fileSize: file.size,
-          contentType: file.mimetype,
-          fileUrl: file.path,
+          fileName: files[i].originalname,
+          fileSize: files[i].size,
+          contentType: files[i].mimetype,
+          fileUrl: files[i].path,
           uniqueCode: uniCode,
         };
 
-        await new fileUpload(fileData).save();
+        const newFile = new fileUpload(fileData);
+
+        await newFile.save();
       }
 
+      // collect all file ids and save in uniqueCode collection
       const fileData = await fileUpload.find({ uniqueCode: uniCode });
       const fileIds = [];
 
@@ -49,7 +54,7 @@ export default class UploadController {
       res.status(200).json({
         success: true,
         message: 'All files Uploaded',
-        session: fileSession,
+        data: fileSession,
       });
     } catch (err) {
       next(err);

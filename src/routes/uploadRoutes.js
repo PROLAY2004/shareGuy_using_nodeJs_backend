@@ -1,12 +1,10 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
 import UploadController from '../controller/UploadController.js';
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './userUploads');
-  },
+  destination: './userUploads',
+
   filename: function (req, file, cb) {
     // keep original name or add timestamp if needed
     cb(null, Date.now() + '-' + file.originalname);
