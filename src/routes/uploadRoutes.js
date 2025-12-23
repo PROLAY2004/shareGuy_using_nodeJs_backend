@@ -1,11 +1,19 @@
 import express from 'express';
 import multer from 'multer';
-
+import path from 'path';
 import UploadController from '../controller/UploadController.js';
 
-const files = multer({
-  storage: multer.memoryStorage(), // <-- file stored in RAM only
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './userUploads');
+  },
+  filename: function (req, file, cb) {
+    // keep original name or add timestamp if needed
+    cb(null, Date.now() + '-' + file.originalname);
+  },
 });
+
+const files = multer({ storage });
 
 const router = express.Router();
 const upload = new UploadController();

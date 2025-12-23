@@ -30,26 +30,17 @@ export default class UploadController {
       const data = `${req.protocol}://${req.get('host')}/download/${uniCode}`;
       const qrPath = await genQR(data, uniCode);
 
-      for (let i = 0; i < files.length; i++) {
-        const tgForm = tgObj(files[i].buffer, {
-          filename: files[i].originalname,
-          contentType: files[i].mimetype,
-        });
-
-        const fileUrl = await getUrl(tgForm);
-
+      for (const file of files) {
         const fileData = {
-          fileName: files[i].originalname,
-          fileSize: files[i].size,
-          contentType: files[i].mimetype,
-          fileUrl,
+          fileName: file.originalname,
+          fileSize: file.size,
+          contentType: file.mimetype,
+          fileUrl: file.path,
           uniqueCode: uniCode,
           qrPath,
         };
 
-        const newFile = new fileUpload(fileData);
-
-        await newFile.save();
+        await new fileUpload(fileData).save();
       }
 
       const fileData = await fileUpload.find({ uniqueCode: uniCode });
@@ -99,7 +90,6 @@ export default class UploadController {
         message: 'Transfer Ended',
         session: endFileSession,
       });
-
     } catch (err) {
       next(err);
     }
