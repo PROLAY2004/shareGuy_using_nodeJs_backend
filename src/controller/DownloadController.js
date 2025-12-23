@@ -1,5 +1,6 @@
-import axios from 'axios';
 import archiver from 'archiver';
+import fs from 'fs';
+import path from 'path';
 
 import SendEmailService from '../services/SendEmailService.js';
 import fileUpload from '../models/fileModel.js';
@@ -14,38 +15,51 @@ export default class DownloadController {
 
       if (fileIds.length === 1) {
         const file = await fileUpload.findById(fileIds[0]);
-        const fileUrl = file.fileUrl;
 
-        const response = await axios.get(fileUrl, { responseType: 'stream' });
+        if (!file) {
+          res.status(404);
+          throw new Error('File not found');
+        }
+
+        const filePath = path.resolve(file.fileUrl);
+
+        if (!fs.existsSync(filePath)) {
+          res.status(404);
+          throw new Error('File missing on server');
+        }
 
         res.setHeader(
           'Content-Disposition',
           `attachment; filename="${file.fileName}"`
         );
-        res.setHeader('Content-Type', response.headers['content-type']);
+        res.setHeader('Content-Type', file.contentType);
 
-        response.data.pipe(res);
+        const readStream = fs.createReadStream(filePath);
+        readStream.pipe(res);
       } else {
-        const customFileName = req.code + ".zip"
+        const zipName = `${req.code}.zip`;
+
         res.setHeader(
           'Content-Disposition',
-          `attachment; filename=${customFileName}`
+          `attachment; filename="${zipName}"`
         );
         res.setHeader('Content-Type', 'application/zip');
 
         const archive = archiver('zip', { zlib: { level: 9 } });
         archive.pipe(res);
 
-        for (let id of fileIds) {
+        for (const id of fileIds) {
           const file = await fileUpload.findById(id);
-          const fileUrl = file.fileUrl;
+          if (!file) continue;
 
-          const response = await axios.get(fileUrl, { responseType: 'stream' });
+          const filePath = path.resolve(file.fileUrl);
 
-          archive.append(response.data, { name: file.fileName });
+          if (fs.existsSync(filePath)) {
+            archive.file(filePath, { name: file.fileName });
+          }
         }
 
-        archive.finalize();
+        await archive.finalize();
       }
     } catch (err) {
       next(err);
@@ -56,12 +70,12 @@ export default class DownloadController {
     try {
       const email = req.body.email;
 
-      if(!isValidEmail(email)){
-        res.status(401)
+      if (!isValidEmail(email)) {
+        res.status(401);
 
         throw new Error('Please Enter a Valid Email');
       }
-      
+
       const fileIds = req.fileIds;
       const files = await fileUpload.find({ _id: { $in: fileIds } });
 
