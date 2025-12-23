@@ -7,8 +7,6 @@ export default class UploadController {
     try {
       const files = req.files;
 
-      console.log(files);
-
       // check is there any file or not
       if (files.length == 0) {
         res.status(404);

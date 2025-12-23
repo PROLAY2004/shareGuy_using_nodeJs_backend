@@ -79,10 +79,28 @@ export default class DownloadController {
       const fileIds = req.fileIds;
       const files = await fileUpload.find({ _id: { $in: fileIds } });
 
-      const formattedFiles = files.map((file) => ({
-        fileName: file.fileName,
-        fileUrl: file.fileUrl, // your URL (Telegram / storage / etc.)
-      }));
+      if (!files.length) {
+        res.status(404);
+        throw new Error('No files found for this code');
+      }
+
+      const formattedFiles = [];
+
+      for (const file of files) {
+        const absolutePath = path.resolve(file.fileUrl);
+
+        if (fs.existsSync(absolutePath)) {
+          formattedFiles.push({
+            fileName: file.fileName,
+            filePath: absolutePath,
+          });
+        }
+      }
+
+      if (!formattedFiles.length) {
+        res.status(404);
+        throw new Error('Files are missing on server');
+      }
 
       const emailResponse = await emailService.fileMailer(
         email,
@@ -91,8 +109,8 @@ export default class DownloadController {
 
       res.status(200).json({
         success: true,
-        message: 'File sent to email.',
-        emailResponse,
+        message: 'File(s) sent to email successfully.',
+        data: emailResponse,
       });
     } catch (err) {
       next(err);

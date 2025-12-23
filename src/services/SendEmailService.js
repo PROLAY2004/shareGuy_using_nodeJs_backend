@@ -23,18 +23,19 @@ export default class SendEmailService {
 
       return info;
     } catch (error) {
-      return error;
+      throw error;
     }
   };
 
   fileMailer = async (email, files) => {
-    // files = [{ fileName, fileUrl }, ...]
     const attachments = files.map((file) => ({
       filename: file.fileName,
-      path: file.fileUrl,
+      path: file.filePath,
     }));
 
     const fileListHtml = files.map((f) => `<li>${f.fileName}</li>`).join('');
+
+    console.log(attachments);
 
     const body = `
       <div style="font-family: Arial, sans-serif;">
