@@ -15,9 +15,9 @@ export default class UploadController {
 
       // check file exceed limit or not
       for (let i = 0; i < files.length; i++) {
-        if (files[i].size > 20971520) {
+        if (files[i].size > 1073741824) {
           res.status(400);
-          throw new Error('File should be less than 20MB');
+          throw new Error('File should be less than 1GB');
         }
       }
 
